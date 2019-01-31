@@ -72,6 +72,8 @@ fi
 sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
+echo "Installing xcode-stuff"
+xcode-select --install
 
 ##############################
 # Prerequisite: Install Brew #
@@ -89,7 +91,6 @@ fi
 brew upgrade
 brew update
 brew tap caskroom/cask
-
 
 #############################################
 ### Generate ssh keys & add to ssh-agent
@@ -153,7 +154,6 @@ done
 
 [[ $retries -eq i ]] && echo "Adding ssh-key to GitHub failed! Try again later."
 
-
 ##############################
 # Install via Brew           #
 ##############################
@@ -161,27 +161,14 @@ done
 echo "Starting brew app install..."
 
 ### Window Management
-# Todo: Try Divvy and spectacles in the future
-brew cask install sizeup  # window manager
-
-# Start SizeUp at login
-defaults write com.irradiatedsoftware.SizeUp StartAtLogin -bool true
-
-# Don’t show the preferences window on next start
-defaults write com.irradiatedsoftware.SizeUp ShowPrefsOnNextStart -bool false
-
+brew cask install spectacle  # window manager
 
 ### Developer Tools
 brew cask install iterm2
 brew cask install dash
-brew install ispell
-
 
 ### Development
 brew cask install docker
-brew install postgresql
-brew install redis
-
 
 ### Command line tools - install new ones, update others to latest version
 brew install git  # upgrade to latest
@@ -194,61 +181,68 @@ brew link curl --force
 brew install grep --with-default-names
 brew install trash  # move to osx trash instead of rm
 brew install less
+brew install neovim
+brew install tmux
+brew install htop
+brew install ncdu
+brew install wifi-password
 
+### Zsh & Oh My Zsh
+echo "Installing Oh My ZSH..."
+curl -L http://install.ohmyz.sh | sh
+
+### Node setup
+# curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+# nvm install node
+# nvm use node
+
+# npm dependencies
+npm install -g n
+npm install -g http-server
+npm install -g ntl
+npm install -g fkill-cli
+npm install -g diff-so-fancy
+
+### Setup diff-so-fancy
+git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
+git config --global color.ui true
+git config --global color.diff-highlight.oldNormal    "red bold"
+git config --global color.diff-highlight.oldHighlight "red bold 52"
+git config --global color.diff-highlight.newNormal    "green bold"
+git config --global color.diff-highlight.newHighlight "green bold 22"
+git config --global color.diff.meta       "yellow"
+git config --global color.diff.frag       "magenta bold"
+git config --global color.diff.commit     "yellow bold"
+git config --global color.diff.old        "red bold"
+git config --global color.diff.new        "green bold"
+git config --global color.diff.whitespace "red reverse"
 
 ### Python
-brew install python
-brew install pyenv
-
-
-### Microcontrollers & Electronics
-brew install avrdude
-brew cask install arduino
-# Manually install teensyduino from:
-# https://www.pjrc.com/teensy/td_download.html
-
+brew install python3
 
 ### Dev Editors 
 brew cask install visual-studio-code
-brew cask install pycharm
-### spacemacs github.com/syl20bnr/spacemacs
-git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
-brew tap d12frosted/emacs-plus
-brew install emacs-plus --HEAD --with-natural-title-bars
-brew linkapps emacs-plus
-
 
 ### Writing
-brew cask install evernote
 brew cask install macdown
-brew cask install notion
-
 
 ### Conferences, Blogging, Screencasts
-brew cask install deckset
 brew cask install ImageOptim  # for optimizing images
 brew cask install screenflow
 
-
 ### Productivity
-brew cask install wavebox
 brew cask install google-chrome
 brew cask install alfred
-brew cask install dropbox
-
 brew cask install timing  # time and project tracker
 brew cask install keycastr  # show key presses on screen (for gifs & screencasts)
 brew cask install betterzip
 brew cask install caffeine  # keep computer from sleeping
 brew cask install skitch  # app to annotate screenshots
 brew cask install muzzle
-brew cask install flux
-
 
 ### Keyboard & Mouse
 brew cask install karabiner-elements  # remap keys, emacs shortcuts
 brew cask install scroll-reverser  # allow natural scroll for trackpad, not for mouse
-
 
 ### Quicklook plugins https://github.com/sindresorhus/quick-look-plugins
 brew cask install qlcolorcode # syntax highlighting in preview
@@ -258,22 +252,12 @@ brew cask install quicklook-json  # preview json files
 brew cask install epubquicklook  # preview epubs, make nice icons
 brew cask install quicklook-csv  # preview csvs
 
-
 ### Chat / Video Conference
 brew cask install slack
-brew cask install microsoft-teams
 brew cask install zoomus
-brew cask install signal
-
-
-### Music and Video
-brew cask install marshallofsound-google-play-music-player
-brew cask install vlc
-
 
 ### Run Brew Cleanup
 brew cleanup
-
 
 #############################################
 ### Fonts
@@ -290,36 +274,6 @@ brew cask install font-fira-code
 ### SourceCodePro + Powerline + Awesome Regular (for powerlevel 9k terminal icons)
 cd ~/Library/Fonts && { curl -O 'https://github.com/Falkor/dotfiles/blob/master/fonts/SourceCodePro+Powerline+Awesome+Regular.ttf?raw=true' ; cd -; }
 
-
-#############################################
-### Installs from Mac App Store
-#############################################
-
-echo "Installing apps from the App Store..."
-
-### find app ids with: mas search "app name"
-brew install mas
-
-### Mas login is currently broken on mojave. See:
-### Login manually for now.
-
-cecho "Need to log in to App Store manually to install apps with mas...." $red
-echo "Opening App Store. Please login."
-open "/Applications/App Store.app"
-echo "Is app store login complete.(y/n)? "
-read response
-if [ "$response" != "${response#[Yy]}" ]
-then
-	mas install 907364780  # Tomato One - Pomodoro timer
-	mas install 485812721  # Tweetdeck
-	mas install 668208984  # GIPHY Capture. The GIF Maker (For recording my screen as gif)
-	mas install 1351639930 # Gifski, convert videos to gifs
-	mas install 414030210  # Limechat, IRC app.
-else
-	cecho "App Store login not complete. Skipping installing App Store Apps" $red
-fi
-
-
 #############################################
 ### Install few global python packages
 #############################################
@@ -329,7 +283,6 @@ echo "Installing global Python packages..."
 pip3 install --upgrade pip
 pip3 install --user pylint
 pip3 install --user flake8
-
 
 #############################################
 ### Set OSX Preferences - Borrowed from https://github.com/mathiasbynens/dotfiles/blob/master/.macos
